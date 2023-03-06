@@ -1,6 +1,5 @@
-package com.example.composerecorder
+package com.example.composerecorder.presentation.components
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -14,15 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -60,7 +52,7 @@ fun VoiceHertz(
             .fillMaxWidth()
     ) {
         var lastX = -strokeWidth * 3
-        values.forEach { value ->
+        animatedValues.forEach { value ->
             drawRoundRect(
                 color = Color.Gray,
                 topLeft = Offset(
@@ -71,19 +63,5 @@ fun VoiceHertz(
                 cornerRadius = cornerRadius
             )
         }
-
-
-//        val path = Path().apply {
-//            val radius = 150f
-//            moveTo(center.x + radius, center.y)
-//            val controlX1 = center.x - radius
-//            val controlY1 = center.y - radius
-//            val controlX2 = center.x + radius
-//            val controlY2 = center.y + radius
-//            cubicTo(controlX1, controlY1, controlX2, controlY2, center.x, center.y - radius)
-//        }
-//
-//        drawPath(path, Color.Blue, style = Stroke(2f))
-
     }
 }

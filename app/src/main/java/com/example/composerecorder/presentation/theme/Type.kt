@@ -1,4 +1,4 @@
-package com.example.composerecorder.ui.theme
+package com.example.composerecorder.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

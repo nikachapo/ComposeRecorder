@@ -1,11 +1,16 @@
-package com.example.composerecorder
+package com.example.composerecorder.presentation.components
 
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -15,44 +20,54 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
+import com.example.composerecorder.R
 
 @Composable
-fun RecordingButton(modifier: Modifier = Modifier) {
+fun RecordingButton(
+    values: List<MutableState<Float>>,
+    modifier: Modifier = Modifier,
+) {
+
+    val animatedValues = remember {
+        mutableListOf<State<Float>>()
+    }
+
+    for (i in values.indices) {
+        if (animatedValues.size < values.size) {
+            animatedValues.add(
+                animateFloatAsState(
+                    targetValue = values[i].value,
+                    animationSpec = tween(durationMillis = 700, easing = LinearEasing)
+                )
+            )
+        } else {
+            animatedValues[i] = animateFloatAsState(
+                targetValue = values[i].value,
+                animationSpec = tween(durationMillis = 700, easing = LinearEasing)
+            )
+        }
+    }
 
     val path = remember { Path() }
     val fillPath = remember { Path() }
 
-    val bgColor = MaterialTheme.colorScheme.background
+    val onBgColor = MaterialTheme.colorScheme.onBackground
 
     val fillColors = remember {
-        listOf(Color.Black, Color.Gray, bgColor)
+        listOf(onBgColor, Color.Gray, Color.Transparent)
     }
 
-    var sizeWidth by remember {
-        mutableStateOf(0f)
-    }
-    var y1 by remember {
-        mutableStateOf(0f)
-    }
-
-    val y1Animated by animateFloatAsState(targetValue = y1)
-
-    LaunchedEffect(key1 = true, block = {
-        while (true) {
-            delay(300)
-            y1 = sizeWidth / (2..5).random()
-        }
-    })
     Box(modifier = modifier
         .drawBehind {
-            for (i in 0..360 step 40) {
-                rotate(i.toFloat()) {
+            var rotate = 0f
+            animatedValues.forEach {
+                rotate(rotate) {
+                    rotate += 360 / values.size
                     translate(top = -size.height) {
-                        sizeWidth = size.width
                         // (x0, y0) is initial coordinate where path is moved with path.moveTo(x0,y0)
-                        val x0 = size.width / 1.5f
+                        val x0 = size.width / 1.2f
                         val y0 = size.width
 
                         /*
@@ -60,15 +75,15 @@ fun RecordingButton(modifier: Modifier = Modifier) {
                 given point (x2, y2), using the control point (x1, y1).
              */
                         val x1 = size.width / 2
-                        val x2 = size.width / 3
+                        val x2 = size.width / 5
                         val y2 = size.width
                         path.reset()
                         path.moveTo(x0, y0)
-                        path.quadraticBezierTo(x1 = x1, y1 = y1Animated, x2 = x2, y2 = y2)
+                        path.quadraticBezierTo(x1 = x1, y1 = size.width / it.value, x2 = x2, y2 = y2)
 
                         fillPath.reset()
                         fillPath.addPath(path)
-                        fillPath.lineTo(x1, y1)
+                        fillPath.lineTo(x1, size.width / it.value)
                         fillPath.lineTo(x2, y2)
                         fillPath.close()
 
@@ -89,7 +104,12 @@ fun RecordingButton(modifier: Modifier = Modifier) {
             }
         }
         .clip(CircleShape)
-        .background(Color.Blue)
-    )
+        .background(Color.Blue),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Image(modifier = Modifier.size(32.dp), painter = painterResource(id = R.drawable.baseline_mic_24), contentDescription = "")
+
+    }
 
 }
