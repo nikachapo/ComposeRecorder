@@ -1,10 +1,17 @@
 package com.example.composerecorder.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -23,30 +30,59 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.composerecorder.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.random.Random
+
+@JvmInline
+value class WavesCount(val value: Int) {
+    init {
+        if (360 % value != 0) throw IllegalArgumentException("WavesCount must be divider of 360")
+    }
+}
 
 @Composable
 fun RecordingButton(
-    values: List<MutableState<Float>>,
     modifier: Modifier = Modifier,
+    isPlaying: Boolean,
+    wavesCount: WavesCount = WavesCount(6),
+    animationDurationMillis: Int = 300,
+    onPlayChanged: (isPlaying: Boolean) -> Unit = {}
 ) {
 
-    val animatedValues = remember {
-        mutableListOf<State<Float>>()
+    val animatedValues = remember(wavesCount) {
+        mutableStateListOf<Animatable<Float, AnimationVector1D>>().apply {
+            (1..wavesCount.value).map { add(Animatable(0f)) }
+        }
     }
 
-    for (i in values.indices) {
-        if (animatedValues.size < values.size) {
-            animatedValues.add(
-                animateFloatAsState(
-                    targetValue = values[i].value,
-                    animationSpec = tween(durationMillis = 700, easing = LinearEasing)
-                )
-            )
+    LaunchedEffect(key1 = isPlaying) {
+        if (!isPlaying) {
+            for (i in 0..animatedValues.lastIndex) {
+                launch {
+                    if (animatedValues[i].value != 0f) {
+                        animatedValues[i].animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(animationDurationMillis, easing = LinearEasing)
+                        )
+                    }
+                }
+            }
         } else {
-            animatedValues[i] = animateFloatAsState(
-                targetValue = values[i].value,
-                animationSpec = tween(durationMillis = 700, easing = LinearEasing)
-            )
+            while (true) {
+                delay(animationDurationMillis.toLong())
+                if (!isActive) break
+                for (i in 0..animatedValues.lastIndex) {
+                    if (!isActive) break
+                    launch {
+                        animatedValues[i].animateTo(
+                            targetValue = Random.nextFloat() * 2,
+                            animationSpec = tween(animationDurationMillis, easing = LinearEasing)
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -59,27 +95,36 @@ fun RecordingButton(
         listOf(onBgColor, Color.Gray, Color.Transparent)
     }
 
+    val animatedButtonColor by animateColorAsState(
+        targetValue = if (isPlaying) Color.Red else Color.Blue,
+        animationSpec = tween(animationDurationMillis)
+    )
+
     Box(modifier = modifier
+        .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() }) {
+            onPlayChanged(!isPlaying)
+        }
         .drawBehind {
             var rotate = 0f
             animatedValues.forEach {
                 rotate(rotate) {
-                    rotate += 360 / values.size
+                    rotate += 360 / wavesCount.value
                     translate(top = -size.height) {
-                        // (x0, y0) is initial coordinate where path is moved with path.moveTo(x0,y0)
                         val x0 = size.width / 1.2f
                         val y0 = size.width
-
-                        /*
-                Adds a quadratic bezier segment that curves from the current point(x0,y0) to the
-                given point (x2, y2), using the control point (x1, y1).
-             */
                         val x1 = size.width / 2
                         val x2 = size.width / 5
                         val y2 = size.width
                         path.reset()
                         path.moveTo(x0, y0)
-                        path.quadraticBezierTo(x1 = x1, y1 = size.width / it.value, x2 = x2, y2 = y2)
+                        path.quadraticBezierTo(
+                            x1 = x1,
+                            y1 = size.width / it.value,
+                            x2 = x2,
+                            y2 = y2
+                        )
 
                         fillPath.reset()
                         fillPath.addPath(path)
@@ -104,12 +149,33 @@ fun RecordingButton(
             }
         }
         .clip(CircleShape)
-        .background(Color.Blue),
+        .background(animatedButtonColor),
         contentAlignment = Alignment.Center
     ) {
 
-        Image(modifier = Modifier.size(32.dp), painter = painterResource(id = R.drawable.baseline_mic_24), contentDescription = "")
+        AnimatedVisibility(
+            visible = isPlaying,
+            enter = slideInVertically(),
+            exit = fadeOut()
+        ) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                painter = painterResource(id = R.drawable.baseline_stop_24),
+                contentDescription = "Stop recording"
+            )
+        }
 
+        AnimatedVisibility(
+            visible = !isPlaying,
+            enter = slideInVertically(),
+            exit = fadeOut()
+        ) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                painter = painterResource(id = R.drawable.baseline_mic_24),
+                contentDescription = "Start Recording"
+            )
+        }
     }
 
 }
