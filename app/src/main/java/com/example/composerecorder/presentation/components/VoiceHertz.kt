@@ -29,10 +29,11 @@ fun VoiceHertz(
     cornerRadius: CornerRadius = CornerRadius(12f, 12f),
     centerLineWidth: Float = 2f,
     maxValue: Float = 100f,
-    newHertz: Float = 0f
+    newHertz: Float,
+    isPlaying: Boolean,
 ) {
 
-    val values = remember {
+    val values = remember(isPlaying) {
         mutableListOf<MutableState<Float>>().apply {
             addAll((0..wavesCount).map { mutableStateOf(0f) })
         }

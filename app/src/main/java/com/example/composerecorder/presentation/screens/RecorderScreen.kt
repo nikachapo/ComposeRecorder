@@ -1,12 +1,12 @@
 package com.example.composerecorder.presentation.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.composerecorder.presentation.components.RecordingButton
 import com.example.composerecorder.presentation.components.VoiceHertz
@@ -15,14 +15,23 @@ import kotlinx.coroutines.delay
 @Composable
 fun RecorderScreen() {
 
+
+    var isPlaying by remember {
+        mutableStateOf(false)
+    }
+
     var hertz by remember {
         mutableStateOf(0f)
     }
 
-    LaunchedEffect(key1 = true, block = {
-        while (true) {
-            delay(90)
-            hertz = (0..100).random().toFloat()
+    LaunchedEffect(key1 = isPlaying, block = {
+        if (isPlaying) {
+            while (true) {
+                delay(90)
+                hertz = (0..100).random().toFloat()
+            }
+        } else {
+            hertz = 0f
         }
     })
 
@@ -32,12 +41,7 @@ fun RecorderScreen() {
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        VoiceHertz(newHertz = hertz)
-    }
-
-
-    var isPlaying by remember {
-        mutableStateOf(false)
+        VoiceHertz(newHertz = hertz, isPlaying = isPlaying)
     }
 
     Box(contentAlignment = Alignment.Center) {
