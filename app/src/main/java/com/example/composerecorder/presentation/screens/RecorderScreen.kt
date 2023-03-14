@@ -27,7 +27,7 @@ fun RecorderScreen() {
     LaunchedEffect(key1 = isPlaying, block = {
         if (isPlaying) {
             while (true) {
-                delay(90)
+                delay(100)
                 hertz = (0..100).random().toFloat()
             }
         } else {

@@ -1,8 +1,6 @@
 package com.example.composerecorder.presentation.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun VoiceHertz(
@@ -34,39 +35,25 @@ fun VoiceHertz(
     isPlaying: Boolean,
 ) {
 
-    val values = rememberSaveable(isPlaying) {
-        mutableListOf<MutableState<Float>>().apply {
-            addAll((0..wavesCount).map { mutableStateOf(0f) })
+    val animatedValues = rememberSaveable(wavesCount) {
+        mutableStateListOf<Animatable<Float, AnimationVector1D>>().apply {
+            (1..wavesCount).map { add(Animatable(0f)) }
         }
     }
 
-    val animatedValues = remember {
-        mutableListOf<State<Float>>()
-    }
-
-    LaunchedEffect(key1 = newHertz) {
-        values.forEachIndexed { index, value ->
-            if (index == values.lastIndex) {
-                value.value = newHertz
-            } else {
-                value.value = values[index + 1].value
+    LaunchedEffect(key1 = newHertz, key2 = isPlaying) {
+        animatedValues.forEachIndexed { index, value ->
+            launch {
+                if (!isPlaying) {
+                    value.animateTo(0f)
+                } else {
+                    if (index == animatedValues.lastIndex) {
+                        value.animateTo(newHertz)
+                    } else {
+                        value.animateTo(animatedValues[index + 1].value)
+                    }
+                }
             }
-        }
-    }
-
-    for (i in values.indices) {
-        if (animatedValues.size < values.size) {
-            animatedValues.add(
-                animateFloatAsState(
-                    targetValue = values[i].value,
-                    animationSpec = tween(durationMillis = 500, easing = LinearEasing)
-                )
-            )
-        } else {
-            animatedValues[i] = animateFloatAsState(
-                targetValue = values[i].value,
-                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
-            )
         }
     }
 
