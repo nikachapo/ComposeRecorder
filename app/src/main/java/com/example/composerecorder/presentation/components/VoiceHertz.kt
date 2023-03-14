@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -33,7 +34,7 @@ fun VoiceHertz(
     isPlaying: Boolean,
 ) {
 
-    val values = remember(isPlaying) {
+    val values = rememberSaveable(isPlaying) {
         mutableListOf<MutableState<Float>>().apply {
             addAll((0..wavesCount).map { mutableStateOf(0f) })
         }
@@ -98,7 +99,7 @@ fun VoiceHertz(
             var lastX = -strokeWidth
             animatedValues.forEach { value ->
                 drawRoundRect(
-                    color = Color.Gray,
+                    color = onBgColor,
                     topLeft = Offset(
                         x = (lastX + (size.width / animatedValues.size.toFloat())).also {
                             lastX = it

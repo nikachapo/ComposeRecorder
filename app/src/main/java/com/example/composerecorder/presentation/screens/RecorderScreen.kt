@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,12 +16,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun RecorderScreen() {
 
-
-    var isPlaying by remember {
+    var isPlaying by rememberSaveable {
         mutableStateOf(false)
     }
 
-    var hertz by remember {
+    var hertz by rememberSaveable {
         mutableStateOf(0f)
     }
 
@@ -48,6 +48,8 @@ fun RecorderScreen() {
         RecordingButton(
             modifier = Modifier.size(70.dp),
             isPlaying = isPlaying,
-            onPlayChanged = { isPlaying = it })
+            onPlayChanged = {
+                isPlaying = it
+            })
     }
 }
