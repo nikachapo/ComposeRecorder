@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "544599369836",
+    "project_id": "composerecorder",
+    "storage_bucket": "composerecorder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544599369836:android:1cf9374b74d18d6f2c5049",
+        "android_client_info": {
+          "package_name": "com.example.composerecorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "544599369836-94mnjtgmtvaedjv5nj7rlp9ubhp9thvm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbFMqxTQwafxMOg626HWWPbI1191jXrls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "544599369836-94mnjtgmtvaedjv5nj7rlp9ubhp9thvm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
