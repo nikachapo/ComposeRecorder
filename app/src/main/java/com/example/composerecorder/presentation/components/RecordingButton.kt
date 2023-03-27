@@ -46,7 +46,7 @@ value class WavesCount(val value: Int) {
 fun RecordingButton(
     modifier: Modifier = Modifier,
     isPlaying: Boolean,
-    wavesCount: WavesCount = WavesCount(6),
+    wavesCount: WavesCount = WavesCount(4),
     animationDurationMillis: Int = 300,
     onPlayChanged: (isPlaying: Boolean) -> Unit = {}
 ) {
@@ -72,7 +72,6 @@ fun RecordingButton(
         } else {
             while (true) {
                 delay(animationDurationMillis.toLong())
-                if (!isActive) break
                 for (i in 0..animatedValues.lastIndex) {
                     if (!isActive) break
                     launch {
